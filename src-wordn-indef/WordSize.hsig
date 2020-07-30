@@ -1,0 +1,35 @@
+{-# language DataKinds #-}
+{-# language KindSignatures #-}
+{-# language MagicHash #-}
+{-# language UnboxedTuples #-}
+{-# language StandaloneKindSignatures #-}
+
+signature WordSize 
+  ( T
+  , T#
+  , R
+  , MaxBits
+  , liftWord
+  , unliftWord
+  ) where
+import Prelude (Num,Integral,Real,Bounded,Enum,Eq,Ord,Show)
+
+import GHC.Exts (TYPE,RuntimeRep,Word#)
+import GHC.TypeLits
+
+instance Num T
+instance Integral T
+instance Real T
+instance Bounded T
+instance Enum T
+instance Eq T
+instance Ord T
+instance Show T
+
+data T
+data R :: RuntimeRep
+data T# :: TYPE R
+data MaxBits :: Nat
+
+liftWord :: Word# -> T
+unliftWord :: T -> Word#
