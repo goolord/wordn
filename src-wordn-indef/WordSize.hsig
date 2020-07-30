@@ -12,7 +12,9 @@ signature WordSize
   , liftWord
   , unliftWord
   ) where
+
 import Prelude (Num,Integral,Real,Bounded,Enum,Eq,Ord,Show)
+import Data.Bits (Bits)
 
 import GHC.Exts (TYPE,RuntimeRep,Word#)
 import GHC.TypeLits
@@ -25,6 +27,7 @@ instance Enum T
 instance Eq T
 instance Ord T
 instance Show T
+instance Bits T
 
 data T
 data R :: RuntimeRep

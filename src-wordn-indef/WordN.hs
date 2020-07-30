@@ -10,8 +10,11 @@
   , ScopedTypeVariables
 #-}
 
-module WordN where
+module WordN 
+  ( WordN(..)
+  ) where
 
+import Data.Bits
 import GHC.TypeNats
 import GHC.Types
 import GHC.Enum
@@ -49,7 +52,12 @@ instance (KnownNat n, n <= WordSize.MaxBits) => Enum (WordN n) where
 
 instance forall n. (KnownNat n, n <= WordSize.MaxBits) => Bounded (WordN n) where
   minBound = 0
-  maxBound = (2 ^ bits) - 1
-    where 
-    bits = natVal (Proxy :: Proxy n)
+  maxBound = wordnMask
+
+{-# INLINE wordnMask #-}
+-- | An (WordN n) with all the bits set, used for masking.
+wordnMask :: forall n. (KnownNat n) => WordN n
+wordnMask = WordN . (flip (-) 1) . bit $ fromIntegral bits
+  where 
+  bits = natVal (Proxy :: Proxy n)
 
