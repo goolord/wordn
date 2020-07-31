@@ -14,7 +14,7 @@ signature WordSize
   ) where
 
 import Prelude (Num,Integral,Real,Bounded,Enum,Eq,Ord,Show)
-import Data.Bits (Bits)
+import Data.Bits (Bits,FiniteBits)
 
 import GHC.Exts (TYPE,RuntimeRep,Word#)
 import GHC.TypeLits
@@ -28,6 +28,7 @@ instance Eq T
 instance Ord T
 instance Show T
 instance Bits T
+instance FiniteBits T
 
 data T
 data R :: RuntimeRep
@@ -36,3 +37,5 @@ data MaxBits :: Nat
 
 liftWord :: Word# -> T
 unliftWord :: T -> Word#
+
+

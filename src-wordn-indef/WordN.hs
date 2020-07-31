@@ -76,6 +76,44 @@ instance forall n. (KnownNat n, n <= WordSize.MaxBits) => Bounded (WordN n) wher
   minBound = 0
   maxBound = wordNMask
 
+instance (KnownNat n, n <= WordSize.MaxBits) => Bits (WordN n) where
+    (WordN l) .&. (WordN r) = WordN $ l .&. r
+    (WordN l) .|. (WordN r) = WordN $ l .|. r
+    xor (WordN l) (WordN r) = WordN $ xor l r
+    complement x = x `xor` wordNMask
+    bit n | n < (fromIntegral $ natVal (Proxy :: Proxy n))
+          = WordN $ bit n
+          | otherwise = WordN 0
+    setBit (WordN x) n | n < (fromIntegral $ natVal (Proxy :: Proxy n))
+                    = WordN $ setBit x n
+                    | otherwise = WordN x
+    clearBit (WordN x) n = WordN $ clearBit x n
+    complementBit (WordN x) n | n < (fromIntegral $ natVal (Proxy :: Proxy n))
+                           = WordN $ complementBit x n
+                           | otherwise = WordN x
+    testBit (WordN x) n = testBit x n
+    bitSize _ = fromIntegral $ natVal (Proxy :: Proxy n)
+    bitSizeMaybe _ = Just $ fromIntegral $ natVal (Proxy :: Proxy n)
+    isSigned _ = False 
+    shiftL (WordN x) n = maskWordN $ shiftL x n
+    shiftR (WordN x) n = WordN $ shiftR x n
+    rotateL (WordN x) n = WordN $
+        (shiftL x n' .&. getWord (wordNMask :: WordN n)) .|. shiftR x (w-n')
+        where n' = n `mod` w
+              w = fromIntegral $ natVal (Proxy :: Proxy n)
+    rotateR (WordN x) n = WordN $
+        shiftR x n' .|. (shiftL x (w-n') .&. getWord (wordNMask :: WordN n))
+        where n' = n `mod` w
+              w  = fromIntegral $ natVal (Proxy :: Proxy n)
+    popCount (WordN x) = popCount x
+
+instance (KnownNat n, n <= WordSize.MaxBits) => FiniteBits (WordN n) where
+    finiteBitSize _ = fromIntegral $ natVal (Proxy :: Proxy n) 
+    countLeadingZeros (WordN x) =
+        subWordClz (fromIntegral $ natVal (Proxy :: Proxy n)) x
+    countTrailingZeros (WordN x) =
+        subWordCtz (fromIntegral $ natVal (Proxy :: Proxy n)) x
+
 --------------------------------------------------------------------------
 
 newtype NoMask (n :: Nat) = NoMask { noMask :: WordSize.T }
@@ -114,3 +152,12 @@ preserveBitsR f (NoMask w1) (NoMask w2) =
       mask = getWord (wordNMask :: WordN n)
       upper = w2 .&. complement mask
    in NoMask $ (f w1' w2') .|. upper
+
+-- | Count the leading zeros on a @w@-bit wide word.
+subWordClz :: Int -> WordSize.T -> Int
+subWordClz w x = countLeadingZeros x + w - finiteBitSize x
+
+-- | Count the trailing zeros on a @w@-bit wide word.
+subWordCtz :: Int -> WordSize.T -> Int
+subWordCtz w x = min (countTrailingZeros x) w
+
