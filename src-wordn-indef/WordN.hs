@@ -37,8 +37,9 @@ instance (KnownNat n, n <= WordSize.MaxBits) => Num (WordN n) where
   (WordN l) - (WordN r) = maskWordN $ (l - r)
   negate (WordN x)   = maskWordN $ negate x
   abs w = w
-  signum (WordN x) | x == 0    = 0
-                | otherwise = 1
+  signum (WordN x) 
+    | x == 0 = 0
+    | otherwise = 1
   fromInteger i = maskWordN $ fromInteger i 
 
 instance (n <= WordSize.MaxBits) => Show (WordN n) where
