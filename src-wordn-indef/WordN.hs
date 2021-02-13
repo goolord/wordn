@@ -32,9 +32,9 @@ data Proxy (n :: Nat) = Proxy
 newtype WordN (n :: Nat) = WordN { getWord :: WordSize.T }
 
 instance (KnownNat n, n <= WordSize.MaxBits) => Num (WordN n) where
-  (WordN l) + (WordN r) = maskWordN $ (l + r)
-  (WordN l) * (WordN r) = maskWordN $ (l * r)
-  (WordN l) - (WordN r) = maskWordN $ (l - r)
+  (WordN l) + (WordN r) = maskWordN (l + r)
+  (WordN l) * (WordN r) = maskWordN (l * r)
+  (WordN l) - (WordN r) = maskWordN (l - r)
   negate (WordN x)   = maskWordN $ negate x
   abs w = w
   signum (WordN x) 
@@ -120,7 +120,7 @@ instance (KnownNat n, n <= WordSize.MaxBits) => FiniteBits (WordN n) where
 newtype NoMask (n :: Nat) = NoMask { noMask :: WordSize.T }
 
 instance forall n. (KnownNat n , n <= WordSize.MaxBits) => Show (NoMask n) where
-  show (NoMask w) = show $ (maskWordN w :: WordN n)
+  show (NoMask w) = show (maskWordN w :: WordN n)
 
 deriving instance (n <= WordSize.MaxBits) => Eq (NoMask n)
 deriving instance (n <= WordSize.MaxBits) => Ord (NoMask n)
@@ -132,7 +132,7 @@ instance forall n. (KnownNat n, n <= WordSize.MaxBits) => Bounded (NoMask n) whe
 {-# INLINE wordNMask #-}
 -- | An (WordN n) with all the bits set, used for masking.
 wordNMask :: forall n. (KnownNat n) => WordN n
-wordNMask = WordN . (flip (-) 1) . bit $ fromIntegral bits
+wordNMask = WordN . flip (-) 1 . bit $ fromIntegral bits
   where 
   bits = natVal (Proxy :: Proxy n)
 
